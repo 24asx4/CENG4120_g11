@@ -21,6 +21,15 @@ class tap{
             this->y=y;
         }
 };
+
+bool vec_contain(vector<int> vec, int target){
+    for (int i=0;i<vec.size();i++){
+        if (vec.at(i)==target){
+            return true;
+        }
+    }
+    return false;
+}
 int manhattan_distance(int x1, int y1, int x2, int y2){
     return (abs(x1-x2)+abs(y1-y2));
 }
@@ -79,6 +88,7 @@ int main(int argc, char * argv[]){
         pin_d.push_back(temp_vec);
         temp_vec.clear();
     }
+    /* print the table */
     for (int i=0;i<curr_load_remain.size();i++){
         cout<<"load_tap"<<i<<": "<<curr_load_remain.at(i)<<endl;
     }
@@ -89,7 +99,59 @@ int main(int argc, char * argv[]){
         }
         cout<<endl;
     }
+    /* run the alg */
+    vector<int> max_dis_pin;
+    vector<int> min_dis_pin;
+    vector<int> done;
+    vector<vector <int> > pin_to_tap(num_taps);
+    
+    while (done.size()<num_pins){
+        int max_dis=-1;
+        for (int i=0;i<pin_d.size();i++){
+            if (vec_contain(done,i)){
+                continue;
+            }
+            for (int j=0;j<pin_d.at(0).size();j++){
+                if (pin_d.at(i).at(j)>max_dis){
+                    max_dis_pin.clear();
+                    max_dis=pin_d.at(i).at(j);
+                    max_dis_pin.push_back(i);
+                } else if (pin_d.at(i).at(j)==max_dis){
+                    max_dis_pin.push_back(i);
+                }
+            }
+        }
 
+        for (int i=0;i<max_dis_pin.size();i++){
+            int min_dis=9999999;
+            for (int j=0;j<pin_d.at(0).size();j++){
+                if (pin_d.at(max_dis_pin.at(i)).at(j)<min_dis){
+                    min_dis_pin.clear();
+                    min_dis=pin_d.at(max_dis_pin.at(i)).at(j);
+                    min_dis_pin.push_back(j);
+                } else if (pin_d.at(max_dis_pin.at(i)).at(j)==min_dis){
+                    min_dis_pin.push_back(j);
+                }
+            }
+            pin_to_tap.at(min_dis_pin.at(0)).push_back(max_dis_pin.at(i));
+            min_dis_pin.clear();
+        }
+
+        cout<<"max_dis_pin: ";
+        for (int i=0;i<max_dis_pin.size();i++){
+            done.push_back(max_dis_pin.at(i));
+            cout<<max_dis_pin.at(i)<<" ";
+        }
+        cout<<endl;
+        for (int i=0;i<pin_to_tap.size();i++){
+            cout<<"pin_to_tap"<<i<<": ";
+            for (int j=0;j<pin_to_tap.at(i).size();j++){
+                cout<<pin_to_tap.at(i).at(j)<<" ";    
+            }
+            cout<<endl;
+        }
+        max_dis_pin.clear();
+    }
     /* debug info just from the input file */
     cout<<endl;
     cout<<"debug_info----------------------------------------------------"<<endl;
