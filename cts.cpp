@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <iomanip>
+#include <cstring>
 using namespace std;
 
 class pin{
@@ -35,12 +37,27 @@ int manhattan_distance(int x1, int y1, int x2, int y2){
 }
 
 int main(int argc, char * argv[]){
-    if (argc < 2 || argc > 3) {
-        cout<<"usage: reduce <in_file> <out_file>"<<endl;
+    /* measure time (start) */
+    int start = clock();
+    if (argc < 5 || argc > 5) {
+        cout<<"usage: cts --input <in_file> --output <out_file>"<<endl;
         exit(1);
     }
-    char * inFile = argv[1];
-    char * outFile = argv[2];
+    char * inFile;
+    char * outFile;
+    if (strcmp(argv[1],"--input")==0){
+        inFile = argv[2];
+    } else{
+        cout<<"usage: cts --input <in_file> --output <out_file>"<<endl;
+        exit(1);
+    }
+    if (strcmp(argv[3],"--output")==0){
+        outFile = argv[4];
+    } else{
+        cout<<"usage: cts --input <in_file> --output <out_file>"<<endl;
+        exit(1);
+    }
+
     string info_type;
     ifstream in(inFile);    //input filestream
     ofstream out(outFile);  //output filestream
@@ -183,4 +200,8 @@ int main(int argc, char * argv[]){
         cout<<"tap"<<i<<": "<<taps.at(i)->x<<" "<<taps.at(i)->y<<endl;
     }
     out.close();
+
+    /* measuer time (end) */
+    int end = clock();
+	std::cout << "it took " << end - start << " ticks, or " << ((float)end - start)/CLOCKS_PER_SEC << "seconds." << std::endl;
 }
