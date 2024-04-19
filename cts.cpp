@@ -104,6 +104,7 @@ int main(int argc, char * argv[]){
     vector<int> min_dis_pin;
     vector<int> done;
     vector<vector <int> > pin_to_tap(num_taps);
+    vector<int> full_load;
     
     while (done.size()<num_pins){
         int max_dis=-1;
@@ -115,9 +116,13 @@ int main(int argc, char * argv[]){
                 if (pin_d.at(i).at(j)>max_dis){
                     max_dis_pin.clear();
                     max_dis=pin_d.at(i).at(j);
-                    max_dis_pin.push_back(i);
+                    if (!vec_contain(max_dis_pin, i)){
+                        max_dis_pin.push_back(i);
+                    }
                 } else if (pin_d.at(i).at(j)==max_dis){
-                    max_dis_pin.push_back(i);
+                    if (!vec_contain(max_dis_pin, i)){
+                        max_dis_pin.push_back(i);
+                    }
                 }
             }
         }
@@ -125,6 +130,9 @@ int main(int argc, char * argv[]){
         for (int i=0;i<max_dis_pin.size();i++){
             int min_dis=9999999;
             for (int j=0;j<pin_d.at(0).size();j++){
+                if (vec_contain(full_load, j)){
+                    continue;
+                }
                 if (pin_d.at(max_dis_pin.at(i)).at(j)<min_dis){
                     min_dis_pin.clear();
                     min_dis=pin_d.at(max_dis_pin.at(i)).at(j);
@@ -134,9 +142,13 @@ int main(int argc, char * argv[]){
                 }
             }
             pin_to_tap.at(min_dis_pin.at(0)).push_back(max_dis_pin.at(i));
+            curr_load_remain.at(min_dis_pin.at(0))--;
+            if (curr_load_remain.at(min_dis_pin.at(0))==0){
+                full_load.push_back(min_dis_pin.at(0));
+            }
             min_dis_pin.clear();
         }
-
+        cout<<endl;
         cout<<"max_dis_pin: ";
         for (int i=0;i<max_dis_pin.size();i++){
             done.push_back(max_dis_pin.at(i));
@@ -149,6 +161,9 @@ int main(int argc, char * argv[]){
                 cout<<pin_to_tap.at(i).at(j)<<" ";    
             }
             cout<<endl;
+        }
+        for (int i=0;i<curr_load_remain.size();i++){
+            cout<<"load_tap"<<i<<": "<<curr_load_remain.at(i)<<endl;
         }
         max_dis_pin.clear();
     }
