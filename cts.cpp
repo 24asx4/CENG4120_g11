@@ -32,6 +32,17 @@ bool vec_contain(vector<int> vec, int target){
     }
     return false;
 }
+int best_tap(vector<int> pin, vector<int> tap){
+    int max=-1;
+    int max_index=-1;
+    for (int i=0;i<pin.size();i++){
+        if (tap.at(pin.at(i))>max){
+            max=tap.at(pin.at(i));
+            max_index=i;
+        }
+    }
+    return max_index;
+}
 int manhattan_distance(int x1, int y1, int x2, int y2){
     return (abs(x1-x2)+abs(y1-y2));
 }
@@ -105,7 +116,8 @@ int main(int argc, char * argv[]){
         pin_d.push_back(temp_vec);
         temp_vec.clear();
     }
-    /* print the table */
+    /* print the table (debug only) */
+    /*
     for (int i=0;i<curr_load_remain.size();i++){
         cout<<"load_tap"<<i<<": "<<curr_load_remain.at(i)<<endl;
     }
@@ -116,6 +128,7 @@ int main(int argc, char * argv[]){
         }
         cout<<endl;
     }
+    */
     /* run the alg */
     vector<int> max_dis_pin;
     vector<int> min_dis_pin;
@@ -158,17 +171,26 @@ int main(int argc, char * argv[]){
                     min_dis_pin.push_back(j);
                 }
             }
-            pin_to_tap.at(min_dis_pin.at(0)).push_back(max_dis_pin.at(i));
-            curr_load_remain.at(min_dis_pin.at(0))--;
+            if (min_dis_pin.size()<=1){
+                pin_to_tap.at(min_dis_pin.at(0)).push_back(max_dis_pin.at(i));
+                curr_load_remain.at(min_dis_pin.at(0))--;
+            } else{
+                pin_to_tap.at(min_dis_pin.at(best_tap(min_dis_pin, curr_load_remain))).push_back(max_dis_pin.at(i));
+                curr_load_remain.at(min_dis_pin.at(best_tap(min_dis_pin, curr_load_remain)))--;
+            }
             if (curr_load_remain.at(min_dis_pin.at(0))==0){
                 full_load.push_back(min_dis_pin.at(0));
             }
             min_dis_pin.clear();
         }
+        for (int i=0;i<max_dis_pin.size();i++){
+            done.push_back(max_dis_pin.at(i));
+        }
+        /* print the pins assigning step (debug only) */
+        /*
         cout<<endl;
         cout<<"max_dis_pin: ";
         for (int i=0;i<max_dis_pin.size();i++){
-            done.push_back(max_dis_pin.at(i));
             cout<<max_dis_pin.at(i)<<" ";
         }
         cout<<endl;
@@ -182,9 +204,11 @@ int main(int argc, char * argv[]){
         for (int i=0;i<curr_load_remain.size();i++){
             cout<<"load_tap"<<i<<": "<<curr_load_remain.at(i)<<endl;
         }
+        */
         max_dis_pin.clear();
     }
-    /* debug info just from the input file */
+    /* print the info just from the input file (debug only) */
+    /*
     cout<<endl;
     cout<<"debug_info----------------------------------------------------"<<endl;
     cout<<"max_runtime: "<<max_runtime<<endl;
@@ -199,6 +223,19 @@ int main(int argc, char * argv[]){
     for (int i=0;i<num_taps;i++){
         cout<<"tap"<<i<<": "<<taps.at(i)->x<<" "<<taps.at(i)->y<<endl;
     }
+    */
+    for (int i=0;i<pin_to_tap.size();i++){
+        out<<"TAP "<<i<<endl;
+        out<<"PINS "<<pin_to_tap.at(i).size()<<endl;
+        for (int j=0;j<pin_to_tap.at(i).size();j++){
+            out<<"PIN "<<pin_to_tap.at(i).at(j)<<endl;
+        }
+        out<<"ROUTING "<<"x"<<endl;
+        for (int j=0;j<5;j++){
+            out<<"EDGE "<<"x"<<" "<<"x"<<" "<<"x"<<" "<<"x"<<" "<<endl;
+        }
+    }
+    
     out.close();
 
     /* measuer time (end) */

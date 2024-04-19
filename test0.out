@@ -1,0 +1,24 @@
+TAP 0
+PINS 4
+PIN 0
+PIN 1
+PIN 2
+PIN 7
+ROUTING x
+EDGE x x x x 
+EDGE x x x x 
+EDGE x x x x 
+EDGE x x x x 
+EDGE x x x x 
+TAP 1
+PINS 4
+PIN 5
+PIN 6
+PIN 3
+PIN 4
+ROUTING x
+EDGE x x x x 
+EDGE x x x x 
+EDGE x x x x 
+EDGE x x x x 
+EDGE x x x x 
