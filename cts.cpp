@@ -23,7 +23,7 @@ class tap{
             this->y=y;
         }
 };
-
+/* check if the vector contain required element */
 bool vec_contain(vector<int> vec, int target){
     for (int i=0;i<vec.size();i++){
         if (vec.at(i)==target){
@@ -32,6 +32,7 @@ bool vec_contain(vector<int> vec, int target){
     }
     return false;
 }
+/* in grouping part, check which tap has max load remain */
 int best_tap(vector<int> pin, vector<int> tap){
     int max=-1;
     int max_index=-1;
@@ -43,6 +44,7 @@ int best_tap(vector<int> pin, vector<int> tap){
     }
     return max_index;
 }
+/* calculate the manhattan distance of 2 point */
 int manhattan_distance(int x1, int y1, int x2, int y2){
     return (abs(x1-x2)+abs(y1-y2));
 }
@@ -50,6 +52,8 @@ int manhattan_distance(int x1, int y1, int x2, int y2){
 int main(int argc, char * argv[]){
     /* measure time (start) */
     int start = clock();
+
+    /* command input validation */
     if (argc < 5 || argc > 5) {
         cout<<"usage: cts --input <in_file> --output <out_file>"<<endl;
         exit(1);
@@ -69,15 +73,14 @@ int main(int argc, char * argv[]){
         exit(1);
     }
 
+    /* read the input file */
     string info_type;
     ifstream in(inFile);    //input filestream
     ofstream out(outFile);  //output filestream
-    
     int max_runtime, max_load, grid_size, capacity, temp_num, temp_x, temp_y, num_pins, num_taps;
     vector<pin *> pins;
     vector<tap *> taps;
     
-    /* read the input file */
     while(in>>info_type){
         if (info_type=="MAX_RUNTIME"){
             in>>max_runtime;
@@ -224,6 +227,9 @@ int main(int argc, char * argv[]){
         cout<<"tap"<<i<<": "<<taps.at(i)->x<<" "<<taps.at(i)->y<<endl;
     }
     */
+
+
+    /* output file */
     for (int i=0;i<pin_to_tap.size();i++){
         out<<"TAP "<<i<<endl;
         out<<"PINS "<<pin_to_tap.at(i).size()<<endl;
@@ -237,6 +243,7 @@ int main(int argc, char * argv[]){
     }
     
     out.close();
+    
 
     /* measuer time (end) */
     int end = clock();
