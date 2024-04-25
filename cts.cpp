@@ -48,7 +48,23 @@ int best_tap(vector<int> pin, vector<int> tap){
 int manhattan_distance(int x1, int y1, int x2, int y2){
     return (abs(x1-x2)+abs(y1-y2));
 }
-
+/* check if a point lie on a line */
+bool lie_on_line(int point_x, int point_y, int line_start_x, int line_start_y, int line_end_x, int line_end_y){
+    if (line_start_x==line_end_x){ /* vertical line */
+        if (point_x==line_start_x){
+            if (line_start_y<=point_y||point_y<=line_end_y){
+                return true;
+            }
+        }
+    } else{ /* horizontal line */
+        if (point_y==line_start_y){
+            if (line_start_x<=point_x||point_x<=line_end_x){
+                return true;
+            }
+        }
+    }
+    return false;
+}
 int main(int argc, char * argv[]){
     /* measure time (start) */
     int start = clock();
@@ -227,8 +243,143 @@ int main(int argc, char * argv[]){
         cout<<"tap"<<i<<": "<<taps.at(i)->x<<" "<<taps.at(i)->y<<endl;
     }
     */
+    vector<vector<int> > pin_to_tap_route=pin_to_tap;
+    vector<vector<int> > line;
+    vector<int> line_cutoff(1,0);
+    //i=tap
+    //j=pin_to
+    //k=point_from
+    for (int i=0;i<taps.size();i++){
+        int previous_line_added=0;
+        int previous_point_added=0;
+        //cout<<"tap"<<i<<endl;
+        vector<int> cur_x;
+        vector<int> cur_y;
+        cur_x.push_back(taps.at(i)->x);
+        cur_y.push_back(taps.at(i)->y);
+        while (pin_to_tap_route.at(i).size()>0){
+            int min=99999999;
+            int from_x=-1;
+            int from_y=-1;
+            int to_x=-1;
+            int to_y=-1;
+            int to_index=0;
+            for (int j=0;j<pin_to_tap_route.at(i).size();j++){
+                for (int k=0;k<cur_x.size();k++){
+                    //cout<<manhattan_distance(cur_x.at(k),cur_y.at(k),pins.at(pin_to_tap_route.at(i).at(j))->x,pins.at(pin_to_tap_route.at(i).at(j))->y)<<" ";
+                    if(manhattan_distance(cur_x.at(k),cur_y.at(k),pins.at(pin_to_tap_route.at(i).at(j))->x,pins.at(pin_to_tap_route.at(i).at(j))->y)<min){
+                        min=manhattan_distance(cur_x.at(k),cur_y.at(k),pins.at(pin_to_tap_route.at(i).at(j))->x,pins.at(pin_to_tap_route.at(i).at(j))->y);
+                        from_x=cur_x.at(k);
+                        from_y=cur_y.at(k);
+                        to_x=pins.at(pin_to_tap_route.at(i).at(j))->x;
+                        to_y=pins.at(pin_to_tap_route.at(i).at(j))->y;
+                        to_index=j;
+                    }
+                }
+            }
+            //cout<<endl;
+            cur_x.push_back(to_x);
+            cur_y.push_back(to_y);
+            pin_to_tap_route.at(i).erase(pin_to_tap_route.at(i).begin()+to_index);
+            /* print the from and to*/
+            /*
+            cout<<"from_x: "<<from_x<<endl;
+            cout<<"from_y: "<<from_y<<endl;
+            cout<<"to_x: "<<to_x<<endl;
+            cout<<"to_y: "<<to_y<<endl;
+            */
 
-
+            /* remove the line*/
+            if (line.size()>0&&previous_line_added>1){
+                if (lie_on_line(from_x,from_y,line.at(line.size()-1).at(0),line.at(line.size()-1).at(1),line.at(line.size()-1).at(2),line.at(line.size()-1).at(3)) || lie_on_line(from_x,from_y,line.at(line.size()-2).at(0),line.at(line.size()-2).at(1),line.at(line.size()-2).at(2),line.at(line.size()-2).at(3))){
+                    for (int k=0;k<1;k++){
+                        line.erase(line.end()-3);
+                    }
+                    for (int k=0;k<previous_point_added/2+2;k++){
+                        cur_x.erase(cur_x.end()-1-previous_point_added/2+2);
+                        cur_y.erase(cur_y.end()-1-previous_point_added/2+2);
+                    }
+                    
+                } else{
+                    for (int k=0;k<1;k++){
+                        line.erase(line.end()-1);
+                    }
+                    for (int k=0;k<previous_point_added/2-2;k++){
+                        cur_x.erase(cur_x.end()-1-previous_point_added/2-2);
+                        cur_y.erase(cur_y.end()-1-previous_point_added/2-2);
+                    }
+                }
+            }
+            /* add the line */
+            if (from_x==to_x){
+                line.push_back({from_x,from_y,to_x,to_y});
+                for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
+                    cur_x.push_back(from_x);
+                    cur_y.push_back(k);
+                }
+                previous_line_added=1;
+                previous_point_added=abs(from_y-to_y)+1;
+            } else if (from_y==to_y){
+                line.push_back({from_x,from_y,to_x,to_y});
+                for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
+                    cur_x.push_back(k);
+                    cur_y.push_back(from_y);
+                }
+                previous_line_added=1;
+                previous_point_added=abs(from_y-to_y)+1;
+            } else{
+                line.push_back({from_x,from_y,to_x,from_y});
+                for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
+                    cur_x.push_back(k);
+                    cur_y.push_back(from_y);
+                }
+                line.push_back({to_x,from_y,to_x,to_y,});
+                for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
+                    if (k==std::min(from_y,to_y)){
+                        continue;
+                    }
+                    cur_x.push_back(from_x);
+                    cur_y.push_back(k);
+                }
+                line.push_back({from_x,from_y,from_x,to_y});
+                for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
+                    if (k==std::min(from_y,to_y)){
+                        continue;
+                    }
+                    cur_x.push_back(from_x);
+                    cur_y.push_back(k);
+                }
+                line.push_back({from_x,to_y,to_x,to_y,});
+                for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
+                    if (k==std::min(from_x,to_x)||k==std::max(from_x,to_x)){
+                        continue;
+                    }
+                    cur_x.push_back(k);
+                    cur_y.push_back(from_y);
+                }
+                previous_line_added=4;
+                previous_point_added=2*(abs(from_y-to_y)+abs(from_x-to_x)+1);
+            }
+            /* remove line 1 more time for last routing step */
+            if (line.size()>0&&previous_line_added>1&&pin_to_tap_route.at(i).size()==0){
+                line.erase(line.end()-1);
+                line.erase(line.end()-1);
+            }
+            /* print the line added*/
+            /*
+            cout<<"line: "<<endl;
+            for (int j=0;j<line.size();j++){
+                for (int k=0;k<line.at(j).size();k++){
+                    cout<<line.at(j).at(k)<<" ";
+                }
+                cout<<endl;
+            }
+            */
+            
+        }
+        line_cutoff.push_back(line.size());
+        //cout<<endl;
+    }
     /* output file */
     for (int i=0;i<pin_to_tap.size();i++){
         out<<"TAP "<<i<<endl;
@@ -236,9 +387,9 @@ int main(int argc, char * argv[]){
         for (int j=0;j<pin_to_tap.at(i).size();j++){
             out<<"PIN "<<pin_to_tap.at(i).at(j)<<endl;
         }
-        out<<"ROUTING "<<"x"<<endl;
-        for (int j=0;j<5;j++){
-            out<<"EDGE "<<"x"<<" "<<"x"<<" "<<"x"<<" "<<"x"<<" "<<endl;
+        out<<"ROUTING "<<line_cutoff.at(i+1)-line_cutoff.at(i)<<endl;
+        for (int j=line_cutoff.at(i);j<line_cutoff.at(i+1);j++){
+            out<<"EDGE "<<line.at(j).at(0)<<" "<<line.at(j).at(1)<<" "<<line.at(j).at(2)<<" "<<line.at(j).at(3)<<" "<<endl;
         }
     }
     
