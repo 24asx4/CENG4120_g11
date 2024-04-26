@@ -65,6 +65,117 @@ bool lie_on_line(int point_x, int point_y, int line_start_x, int line_start_y, i
     }
     return false;
 }
+/* check if the edge overlap the existing edges */
+vector<vector <int> > overlap(vector<vector<int> > line_list, vector<int> line_test){
+    vector<vector<int> > potential_line_list;
+    vector<vector<int> > overlap_list;
+    if (line_test.at(0)==line_test.at(2)){ /* vertical line */
+        for (int i=0;i<line_list.size();i++){
+            if (line_list.at(i).at(0)==line_list.at(i).at(2)&&line_list.at(i).at(2)==line_test.at(2)){
+                potential_line_list.push_back(line_list.at(i));
+            }
+        }
+        for (int i=0;i<potential_line_list.size();i++){
+            vector<int> list;
+            vector<int> test;
+            vector<bool> list_found(2,false);
+            vector<bool> test_found(2,false);
+            list.push_back(potential_line_list.at(i).at(1));
+            list.push_back(potential_line_list.at(i).at(3));
+            test.push_back(line_test.at(1));
+            test.push_back(line_test.at(3));
+            /* sort the list and test */
+            if (list.at(0)>list.at(1)){
+                int temp=list.at(0);
+                list.at(0)=list.at(1);
+                list.at(1)=temp;
+            }
+            if (test.at(0)>test.at(1)){
+                int temp=test.at(0);
+                test.at(0)=test.at(1);
+                test.at(1)=temp;
+            }
+
+            int list_index=0, test_index=0;
+            while (list_index<2&&test_index<2){
+                if (list.at(list_index)<=test.at(test_index)){
+                    list_found.at(list_index)=true;
+                    list_index++;
+                } else{
+                    test_found.at(test_index)=true;
+                    test_index++;
+                }
+            }
+            if (list_index==2){
+                if (test_index==1){
+                    if (std::max(test.at(0),list.at(0))!=list.at(1)){
+                        overlap_list.push_back({line_test.at(0),std::max(test.at(0),list.at(0)),line_test.at(2),list.at(1)});
+                    }
+                }
+            } else if (test_index==2){
+                if (list_index==1){
+                    if (std::max(test.at(0),list.at(0))!=test.at(1)){
+                        overlap_list.push_back({line_test.at(0),std::max(test.at(0),list.at(0)),line_test.at(2),test.at(1)});
+                    }
+                }
+            }
+        }
+    } else{ /* horizontal line */
+        for (int i=0;i<line_list.size();i++){
+            if (line_list.at(i).at(1)==line_list.at(i).at(3)&&line_list.at(i).at(3)==line_test.at(3)){
+                potential_line_list.push_back(line_list.at(i));
+            }
+        }
+        for (int i=0;i<potential_line_list.size();i++){
+            vector<int> list;
+            vector<int> test;
+            vector<bool> list_found(2,false);
+            vector<bool> test_found(2,false);
+            list.push_back(potential_line_list.at(i).at(0));
+            list.push_back(potential_line_list.at(i).at(2));
+            test.push_back(line_test.at(0));
+            test.push_back(line_test.at(2));
+            /* sort the list and test */
+            if (list.at(0)>list.at(1)){
+                int temp=list.at(0);
+                list.at(0)=list.at(1);
+                list.at(1)=temp;
+            }
+            if (test.at(0)>test.at(1)){
+                int temp=test.at(0);
+                test.at(0)=test.at(1);
+                test.at(1)=temp;
+            }
+
+            int list_index=0, test_index=0;
+            while (list_index<2&&test_index<2){
+                if (list.at(list_index)<=test.at(test_index)){
+                    list_found.at(list_index)=true;
+                    list_index++;
+                } else{
+                    test_found.at(test_index)=true;
+                    test_index++;
+                }
+            }
+            if (list_index==2){
+                if (test_index==1){
+                    if (std::max(test.at(0),list.at(0))!=list.at(1)){
+                        overlap_list.push_back({std::max(test.at(0),list.at(0)),line_test.at(1),list.at(1),line_test.at(3)});    
+                    }
+                    
+                }
+            } else if (test_index==2){
+                if (list_index==1){
+                    if (std::max(test.at(0),list.at(0))!=test.at(1)){
+                        overlap_list.push_back({std::max(test.at(0),list.at(0)),line_test.at(1),test.at(1),line_test.at(3)});
+                    }
+                    
+                }
+            }
+        }
+    }
+    return overlap_list;
+}
 int main(int argc, char * argv[]){
     /* measure time (start) */
     int start = clock();
@@ -244,7 +355,7 @@ int main(int argc, char * argv[]){
     }
     */
     vector<vector<int> > pin_to_tap_route=pin_to_tap;
-    vector<vector<int> > line;
+    vector<vector<int> > line_list;
     vector<int> line_cutoff(1,0);
     //i=tap
     //j=pin_to
@@ -300,10 +411,10 @@ int main(int argc, char * argv[]){
             */
 
             /* remove the line*/
-            if (line.size()>0&&previous_line_added>1){
-                if (lie_on_line(from_x,from_y,line.at(line.size()-1).at(0),line.at(line.size()-1).at(1),line.at(line.size()-1).at(2),line.at(line.size()-1).at(3)) || lie_on_line(from_x,from_y,line.at(line.size()-2).at(0),line.at(line.size()-2).at(1),line.at(line.size()-2).at(2),line.at(line.size()-2).at(3))){
+            if (line_list.size()>0&&previous_line_added>1){
+                if (lie_on_line(from_x,from_y,line_list.at(line_list.size()-1).at(0),line_list.at(line_list.size()-1).at(1),line_list.at(line_list.size()-1).at(2),line_list.at(line_list.size()-1).at(3)) || lie_on_line(from_x,from_y,line_list.at(line_list.size()-2).at(0),line_list.at(line_list.size()-2).at(1),line_list.at(line_list.size()-2).at(2),line_list.at(line_list.size()-2).at(3))){
                     for (int k=0;k<2;k++){
-                        line.erase(line.end()-3);
+                        line_list.erase(line_list.end()-3);
                     }
                     
                     for (int k=0;k<previous_point_added/2;k++){
@@ -313,7 +424,7 @@ int main(int argc, char * argv[]){
                     
                 } else{
                     for (int k=0;k<2;k++){
-                        line.erase(line.end()-1);
+                        line_list.erase(line_list.end()-1);
                     }
                     
                     for (int k=0;k<previous_point_added/2;k++){
@@ -325,7 +436,7 @@ int main(int argc, char * argv[]){
             }
             /* add the line */
             if (from_x==to_x){
-                line.push_back({from_x,from_y,to_x,to_y});
+                line_list.push_back({from_x,from_y,to_x,to_y});
                 for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
                     cur_x.push_back(from_x);
                     cur_y.push_back(k);
@@ -333,7 +444,7 @@ int main(int argc, char * argv[]){
                 previous_line_added=1;
                 previous_point_added=abs(from_y-to_y)+1;
             } else if (from_y==to_y){
-                line.push_back({from_x,from_y,to_x,to_y});
+                line_list.push_back({from_x,from_y,to_x,to_y});
                 for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
                     cur_x.push_back(k);
                     cur_y.push_back(from_y);
@@ -341,40 +452,79 @@ int main(int argc, char * argv[]){
                 previous_line_added=1;
                 previous_point_added=abs(from_y-to_y)+1;
             } else{
-                line.push_back({from_x,from_y,to_x,from_y});
-                for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
-                    cur_x.push_back(k);
-                    cur_y.push_back(from_y);
+                bool first_lshape=true;
+                vector<vector<int> > overlap_list1;
+                vector<vector<int> > overlap_list2;
+                previous_line_added=0;
+                if (overlap(line_list,{from_x,from_y,to_x,from_y}).size()==0&&overlap(line_list,{to_x,from_y,to_x,to_y}).size()==0){
+                    line_list.push_back({from_x,from_y,to_x,from_y});
+                    for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
+                        cur_x.push_back(k);
+                        cur_y.push_back(from_y);
+                    }
+                    line_list.push_back({to_x,from_y,to_x,to_y});
+                    for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
+                        cur_x.push_back(to_x);
+                        cur_y.push_back(k);
+                    }
+                    previous_line_added++;    
+                } else{
+                    overlap_list1=overlap(line_list,{from_x,from_y,to_x,from_y});
+                    overlap_list2=overlap(line_list,{to_x,from_y,to_x,to_y});
+                    for (int k=0;k<overlap_list1.size();k++){
+                        for (int l=0;l<overlap_list1.at(k).size();l++){
+                            cout<<overlap_list1.at(k).at(l)<<" ";
+                        }
+                        cout<<endl;
+                    }
+                    for (int k=0;k<overlap_list2.size();k++){
+                        for (int l=0;l<overlap_list2.at(k).size();l++){
+                            cout<<overlap_list2.at(k).at(l)<<" ";
+                        }
+                        cout<<endl;
+                    }
                 }
-                line.push_back({to_x,from_y,to_x,to_y,});
-                for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
-                    cur_x.push_back(to_x);
-                    cur_y.push_back(k);
+                if (overlap(line_list,{from_x,from_y,from_x,to_y}).size()==0&&overlap(line_list,{from_x,to_y,to_x,to_y}).size()==0){
+                    line_list.push_back({from_x,from_y,from_x,to_y});
+                    for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
+                        cur_x.push_back(from_x);
+                        cur_y.push_back(k);
+                    }
+                    line_list.push_back({from_x,to_y,to_x,to_y});
+                    for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
+                        cur_x.push_back(k);
+                        cur_y.push_back(to_y);
+                    }
+                    previous_line_added++; 
+                } else{
+                    overlap_list1=overlap(line_list,{from_x,from_y,from_x,to_y});
+                    overlap_list2=overlap(line_list,{from_x,to_y,to_x,to_y});
+                    for (int k=0;k<overlap_list1.size();k++){
+                        for (int l=0;l<overlap_list1.at(k).size();l++){
+                            cout<<overlap_list1.at(k).at(l)<<" ";
+                        }
+                        cout<<endl;
+                    }
+                    for (int k=0;k<overlap_list2.size();k++){
+                        for (int l=0;l<overlap_list2.at(k).size();l++){
+                            cout<<overlap_list2.at(k).at(l)<<" ";
+                        }
+                        cout<<endl;
+                    }                
                 }
-                line.push_back({from_x,from_y,from_x,to_y});
-                for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
-                    cur_x.push_back(from_x);
-                    cur_y.push_back(k);
-                }
-                line.push_back({from_x,to_y,to_x,to_y,});
-                for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
-                    cur_x.push_back(k);
-                    cur_y.push_back(to_y);
-                }
-                previous_line_added=4;
-                previous_point_added=2*(abs(from_y-to_y)+1+abs(from_x-to_x)+1);
+                previous_point_added=previous_line_added*(abs(from_y-to_y)+1+abs(from_x-to_x)+1);
             }
             /* remove line 1 more time for last routing step */
-            if (line.size()>0&&previous_line_added>1&&pin_to_tap_route.at(i).size()==0){
-                line.erase(line.end()-1);
-                line.erase(line.end()-1);
+            if (line_list.size()>0&&previous_line_added>1&&pin_to_tap_route.at(i).size()==0){
+                line_list.erase(line_list.end()-1);
+                line_list.erase(line_list.end()-1);
             }
             /* print the line added*/
             /*
             cout<<"line: "<<endl;
-            for (int j=0;j<line.size();j++){
-                for (int k=0;k<line.at(j).size();k++){
-                    cout<<line.at(j).at(k)<<" ";
+            for (int j=0;j<line_list.size();j++){
+                for (int k=0;k<line_list.at(j).size();k++){
+                    cout<<line_list.at(j).at(k)<<" ";
                 }
                 cout<<endl;
             }
@@ -382,9 +532,22 @@ int main(int argc, char * argv[]){
             
             
         }
-        line_cutoff.push_back(line.size());
+        line_cutoff.push_back(line_list.size());
         //cout<<endl;
     }
+    /*
+    vector<vector<int> > overlap_list=overlap(line_list,{2,6,4,6});
+    cout<<"overlap2: "<<(overlap(line_list,{4,8,6,8}).size()==0&&overlap(line_list,{6,8,6,6}).size()==0)<<endl;
+    cout<<"overlap: "<<endl;
+    for (int i=0;i<overlap_list.size();i++){
+        for (int j=0;j<overlap_list.at(i).size();j++){
+            cout<<overlap_list.at(i).at(j)<<" ";
+        }
+        cout<<endl;
+    }
+    */
+    
+    
     /* output file */
     for (int i=0;i<pin_to_tap.size();i++){
         out<<"TAP "<<i<<endl;
@@ -394,7 +557,7 @@ int main(int argc, char * argv[]){
         }
         out<<"ROUTING "<<line_cutoff.at(i+1)-line_cutoff.at(i)<<endl;
         for (int j=line_cutoff.at(i);j<line_cutoff.at(i+1);j++){
-            out<<"EDGE "<<line.at(j).at(0)<<" "<<line.at(j).at(1)<<" "<<line.at(j).at(2)<<" "<<line.at(j).at(3)<<" "<<endl;
+            out<<"EDGE "<<line_list.at(j).at(0)<<" "<<line_list.at(j).at(1)<<" "<<line_list.at(j).at(2)<<" "<<line_list.at(j).at(3)<<" "<<endl;
         }
     }
     
