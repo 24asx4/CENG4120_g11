@@ -52,13 +52,13 @@ int manhattan_distance(int x1, int y1, int x2, int y2){
 bool lie_on_line(int point_x, int point_y, int line_start_x, int line_start_y, int line_end_x, int line_end_y){
     if (line_start_x==line_end_x){ /* vertical line */
         if (point_x==line_start_x){
-            if (line_start_y<=point_y||point_y<=line_end_y){
+            if (min(line_start_y,line_end_y)<=point_y||point_y<=max(line_start_y,line_end_y)){
                 return true;
             }
         }
     } else{ /* horizontal line */
         if (point_y==line_start_y){
-            if (line_start_x<=point_x||point_x<=line_end_x){
+            if (min(line_start_x,line_end_x)<=point_x||point_x<=max(line_start_x,line_end_x)){
                 return true;
             }
         }
@@ -258,6 +258,18 @@ int main(int argc, char * argv[]){
         cur_x.push_back(taps.at(i)->x);
         cur_y.push_back(taps.at(i)->y);
         while (pin_to_tap_route.at(i).size()>0){
+            /*
+            cout<<"cur_x: ";
+            for (int j=0;j<cur_x.size();j++){
+                cout<<cur_x.at(j)<<" ";
+            }
+            cout<<endl;
+            cout<<"cur_y: ";
+            for (int j=0;j<cur_y.size();j++){
+                cout<<cur_y.at(j)<<" ";
+            }
+            cout<<endl;
+            */
             int min=99999999;
             int from_x=-1;
             int from_y=-1;
@@ -278,8 +290,6 @@ int main(int argc, char * argv[]){
                 }
             }
             //cout<<endl;
-            cur_x.push_back(to_x);
-            cur_y.push_back(to_y);
             pin_to_tap_route.at(i).erase(pin_to_tap_route.at(i).begin()+to_index);
             /* print the from and to*/
             /*
@@ -292,22 +302,25 @@ int main(int argc, char * argv[]){
             /* remove the line*/
             if (line.size()>0&&previous_line_added>1){
                 if (lie_on_line(from_x,from_y,line.at(line.size()-1).at(0),line.at(line.size()-1).at(1),line.at(line.size()-1).at(2),line.at(line.size()-1).at(3)) || lie_on_line(from_x,from_y,line.at(line.size()-2).at(0),line.at(line.size()-2).at(1),line.at(line.size()-2).at(2),line.at(line.size()-2).at(3))){
-                    for (int k=0;k<1;k++){
+                    for (int k=0;k<2;k++){
                         line.erase(line.end()-3);
                     }
-                    for (int k=0;k<previous_point_added/2+2;k++){
-                        cur_x.erase(cur_x.end()-1-previous_point_added/2+2);
-                        cur_y.erase(cur_y.end()-1-previous_point_added/2+2);
+                    
+                    for (int k=0;k<previous_point_added/2;k++){
+                        cur_x.erase(cur_x.end()-1-previous_point_added/2);
+                        cur_y.erase(cur_y.end()-1-previous_point_added/2);
                     }
                     
                 } else{
-                    for (int k=0;k<1;k++){
+                    for (int k=0;k<2;k++){
                         line.erase(line.end()-1);
                     }
-                    for (int k=0;k<previous_point_added/2-2;k++){
-                        cur_x.erase(cur_x.end()-1-previous_point_added/2-2);
-                        cur_y.erase(cur_y.end()-1-previous_point_added/2-2);
+                    
+                    for (int k=0;k<previous_point_added/2;k++){
+                        cur_x.erase(cur_x.end()-1);
+                        cur_y.erase(cur_y.end()-1);
                     }
+                    
                 }
             }
             /* add the line */
@@ -335,30 +348,21 @@ int main(int argc, char * argv[]){
                 }
                 line.push_back({to_x,from_y,to_x,to_y,});
                 for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
-                    if (k==std::min(from_y,to_y)){
-                        continue;
-                    }
-                    cur_x.push_back(from_x);
+                    cur_x.push_back(to_x);
                     cur_y.push_back(k);
                 }
                 line.push_back({from_x,from_y,from_x,to_y});
                 for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
-                    if (k==std::min(from_y,to_y)){
-                        continue;
-                    }
                     cur_x.push_back(from_x);
                     cur_y.push_back(k);
                 }
                 line.push_back({from_x,to_y,to_x,to_y,});
                 for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
-                    if (k==std::min(from_x,to_x)||k==std::max(from_x,to_x)){
-                        continue;
-                    }
                     cur_x.push_back(k);
-                    cur_y.push_back(from_y);
+                    cur_y.push_back(to_y);
                 }
                 previous_line_added=4;
-                previous_point_added=2*(abs(from_y-to_y)+abs(from_x-to_x)+1);
+                previous_point_added=2*(abs(from_y-to_y)+1+abs(from_x-to_x)+1);
             }
             /* remove line 1 more time for last routing step */
             if (line.size()>0&&previous_line_added>1&&pin_to_tap_route.at(i).size()==0){
@@ -375,6 +379,7 @@ int main(int argc, char * argv[]){
                 cout<<endl;
             }
             */
+            
             
         }
         line_cutoff.push_back(line.size());
