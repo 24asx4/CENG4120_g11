@@ -369,7 +369,10 @@ int main(int argc, char * argv[]){
     */
     vector<vector<int> > pin_to_tap_route=pin_to_tap;
     vector<vector<int> > line_list;
-    vector<vector<vector<int> > > capacity_list(capacity-1);
+    vector<vector<vector<int> > > capacity_list;
+    if (capacity>1){
+        capacity_list.resize(capacity-1);
+    }
     vector<int> line_cutoff(1,0);
     //i=tap
     //j=pin_to
@@ -448,90 +451,179 @@ int main(int argc, char * argv[]){
                     
                 }
             }
-            /* add the line */
-            vector<vector<int> > overlap_list1;
-            vector<vector<int> > overlap_list2;
-            bool ignore_capacity=false;
-            if (from_x==to_x){  /* vertical line */
-                if(!(overlap(capacity_list.at(capacity_list.size()-1),{from_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
-                    set_overlap(line_list,{from_x,from_y,to_x,to_y},capacity_list,0);
-                    line_list.push_back({from_x,from_y,to_x,to_y});
-                    for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
-                        cur_x.push_back(from_x);
-                        cur_y.push_back(k);
-                    }
-                    previous_line_added=1;
-                    previous_point_added=abs(from_y-to_y)+1;
-                } else{
-                    /* path finding */
-                    cout<<"exceed capacity"<<endl;
-                }
-            } else if (from_y==to_y){   /* horizontal line */
-                if(!(overlap(capacity_list.at(capacity_list.size()-1),{from_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
-                    set_overlap(line_list,{from_x,from_y,to_x,to_y},capacity_list,0);
-                    line_list.push_back({from_x,from_y,to_x,to_y});
-                    for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
-                        cur_x.push_back(k);
-                        cur_y.push_back(from_y);
-                    }
-                    previous_line_added=1;
-                    previous_point_added=abs(from_y-to_y)+1;
-                } else{
-                    /* path finding */
-                    cout<<"exceed capacity"<<endl;
-                }
 
+            if (capacity==1){
+                /* add the line (capacity 1)*/
+                vector<vector<int> > overlap_list1;
+                vector<vector<int> > overlap_list2;
+                bool ignore_capacity=false;
+                if (from_x==to_x){  /* vertical line */
+                    if(!(overlap(line_list,{from_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
+                        set_overlap(line_list,{from_x,from_y,to_x,to_y},capacity_list,0);
+                        line_list.push_back({from_x,from_y,to_x,to_y});
+                        for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
+                            cur_x.push_back(from_x);
+                            cur_y.push_back(k);
+                        }
+                        previous_line_added=1;
+                        previous_point_added=abs(from_y-to_y)+1;
+                    } else{
+                        /* path finding */
+                        cout<<"exceed capacity"<<endl;
+                    }
+                } else if (from_y==to_y){   /* horizontal line */
+                    if(!(overlap(line_list,{from_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
+                        set_overlap(line_list,{from_x,from_y,to_x,to_y},capacity_list,0);
+                        line_list.push_back({from_x,from_y,to_x,to_y});
+                        for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
+                            cur_x.push_back(k);
+                            cur_y.push_back(from_y);
+                        }
+                        previous_line_added=1;
+                        previous_point_added=abs(from_y-to_y)+1;
+                    } else{
+                        /* path finding */
+                        cout<<"exceed capacity"<<endl;
+                    }
+
+                } else{
+                    /* first l shape */
+                    bool first_lshape=true;
+                    previous_line_added=0;
+                    if(!(overlap(line_list,{from_x,from_y,to_x,from_y}).size()>0)&&(overlap(line_list,{to_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
+                        set_overlap(line_list,{from_x,from_y,to_x,from_y},capacity_list,0);
+                        set_overlap(line_list,{to_x,from_y,to_x,to_y},capacity_list,0);
+                        line_list.push_back({from_x,from_y,to_x,from_y});
+                        for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
+                            cur_x.push_back(k);
+                            cur_y.push_back(from_y);
+                        }
+                        line_list.push_back({to_x,from_y,to_x,to_y});
+                        for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
+                            cur_x.push_back(to_x);
+                            cur_y.push_back(k);
+                        }
+                        previous_line_added++;
+                        first_lshape=true;    
+                    } else{
+                        first_lshape=false;
+                    }
+                    /* second l shape*/
+                    bool need_path_finding=false;
+                    if(!(overlap(line_list,{from_x,from_y,from_x,to_y}).size()>0)&&!(overlap(line_list,{from_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
+                        set_overlap(line_list,{from_x,from_y,from_x,to_y},capacity_list,0);
+                        set_overlap(line_list,{from_x,to_y,to_x,to_y},capacity_list,0);
+                    } else{
+                        cout<<"exceed capacity"<<endl;
+                        need_path_finding=true;
+                    }
+                    if (!need_path_finding){
+                        line_list.push_back({from_x,from_y,from_x,to_y});
+                        for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
+                            cur_x.push_back(from_x);
+                            cur_y.push_back(k);
+                        }
+                        line_list.push_back({from_x,to_y,to_x,to_y});
+                        for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
+                            cur_x.push_back(k);
+                            cur_y.push_back(to_y);
+                        }
+                        previous_line_added++;
+                    } else if (!first_lshape){
+                        /* path finding */
+                    }
+                    if (!need_path_finding||first_lshape){
+                        previous_point_added=previous_line_added*(abs(from_y-to_y)+1+abs(from_x-to_x)+1);
+                    }
+                    
+                }
             } else{
-                /* first l shape */
-                bool first_lshape=true;
-                previous_line_added=0;
-                if(!(overlap(capacity_list.at(capacity_list.size()-1),{from_x,from_y,to_x,from_y}).size()>0)&&(overlap(capacity_list.at(capacity_list.size()-1),{to_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
-                    set_overlap(line_list,{from_x,from_y,to_x,from_y},capacity_list,0);
-                    set_overlap(line_list,{to_x,from_y,to_x,to_y},capacity_list,0);
-                    line_list.push_back({from_x,from_y,to_x,from_y});
-                    for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
-                        cur_x.push_back(k);
-                        cur_y.push_back(from_y);
+                /* add the line */
+                vector<vector<int> > overlap_list1;
+                vector<vector<int> > overlap_list2;
+                bool ignore_capacity=false;
+                if (from_x==to_x){  /* vertical line */
+                    if(!(overlap(capacity_list.at(capacity_list.size()-1),{from_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
+                        set_overlap(line_list,{from_x,from_y,to_x,to_y},capacity_list,0);
+                        line_list.push_back({from_x,from_y,to_x,to_y});
+                        for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
+                            cur_x.push_back(from_x);
+                            cur_y.push_back(k);
+                        }
+                        previous_line_added=1;
+                        previous_point_added=abs(from_y-to_y)+1;
+                    } else{
+                        /* path finding */
+                        cout<<"exceed capacity"<<endl;
                     }
-                    line_list.push_back({to_x,from_y,to_x,to_y});
-                    for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
-                        cur_x.push_back(to_x);
-                        cur_y.push_back(k);
+                } else if (from_y==to_y){   /* horizontal line */
+                    if(!(overlap(capacity_list.at(capacity_list.size()-1),{from_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
+                        set_overlap(line_list,{from_x,from_y,to_x,to_y},capacity_list,0);
+                        line_list.push_back({from_x,from_y,to_x,to_y});
+                        for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
+                            cur_x.push_back(k);
+                            cur_y.push_back(from_y);
+                        }
+                        previous_line_added=1;
+                        previous_point_added=abs(from_y-to_y)+1;
+                    } else{
+                        /* path finding */
+                        cout<<"exceed capacity"<<endl;
                     }
-                    previous_line_added++;
-                    first_lshape=true;    
+
                 } else{
-                    first_lshape=false;
-                }
-                /* second l shape*/
-                bool need_path_finding=false;
-                if(!(overlap(capacity_list.at(capacity_list.size()-1),{from_x,from_y,from_x,to_y}).size()>0)&&!(overlap(capacity_list.at(capacity_list.size()-1),{from_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
-                    set_overlap(line_list,{from_x,from_y,from_x,to_y},capacity_list,0);
-                    set_overlap(line_list,{from_x,to_y,to_x,to_y},capacity_list,0);
-                } else{
-                    cout<<"exceed capacity"<<endl;
-                    need_path_finding=true;
-                }
-                if (!need_path_finding){
-                    line_list.push_back({from_x,from_y,from_x,to_y});
-                    for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
-                        cur_x.push_back(from_x);
-                        cur_y.push_back(k);
+                    /* first l shape */
+                    bool first_lshape=true;
+                    previous_line_added=0;
+                    if(!(overlap(capacity_list.at(capacity_list.size()-1),{from_x,from_y,to_x,from_y}).size()>0)&&(overlap(capacity_list.at(capacity_list.size()-1),{to_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
+                        set_overlap(line_list,{from_x,from_y,to_x,from_y},capacity_list,0);
+                        set_overlap(line_list,{to_x,from_y,to_x,to_y},capacity_list,0);
+                        line_list.push_back({from_x,from_y,to_x,from_y});
+                        for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
+                            cur_x.push_back(k);
+                            cur_y.push_back(from_y);
+                        }
+                        line_list.push_back({to_x,from_y,to_x,to_y});
+                        for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
+                            cur_x.push_back(to_x);
+                            cur_y.push_back(k);
+                        }
+                        previous_line_added++;
+                        first_lshape=true;    
+                    } else{
+                        first_lshape=false;
                     }
-                    line_list.push_back({from_x,to_y,to_x,to_y});
-                    for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
-                        cur_x.push_back(k);
-                        cur_y.push_back(to_y);
+                    /* second l shape*/
+                    bool need_path_finding=false;
+                    if(!(overlap(capacity_list.at(capacity_list.size()-1),{from_x,from_y,from_x,to_y}).size()>0)&&!(overlap(capacity_list.at(capacity_list.size()-1),{from_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
+                        set_overlap(line_list,{from_x,from_y,from_x,to_y},capacity_list,0);
+                        set_overlap(line_list,{from_x,to_y,to_x,to_y},capacity_list,0);
+                    } else{
+                        cout<<"exceed capacity"<<endl;
+                        need_path_finding=true;
                     }
-                    previous_line_added++;
-                } else if (!first_lshape){
-                    /* path finding */
+                    if (!need_path_finding){
+                        line_list.push_back({from_x,from_y,from_x,to_y});
+                        for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
+                            cur_x.push_back(from_x);
+                            cur_y.push_back(k);
+                        }
+                        line_list.push_back({from_x,to_y,to_x,to_y});
+                        for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
+                            cur_x.push_back(k);
+                            cur_y.push_back(to_y);
+                        }
+                        previous_line_added++;
+                    } else if (!first_lshape){
+                        /* path finding */
+                    }
+                    if (!need_path_finding||first_lshape){
+                        previous_point_added=previous_line_added*(abs(from_y-to_y)+1+abs(from_x-to_x)+1);
+                    }
+                    
                 }
-                if (!need_path_finding||first_lshape){
-                    previous_point_added=previous_line_added*(abs(from_y-to_y)+1+abs(from_x-to_x)+1);
-                }
-                
             }
+
             /* remove line 1 more time for last routing step */
             if (line_list.size()>0&&previous_line_added>1&&pin_to_tap_route.at(i).size()==0){
                 line_list.erase(line_list.end()-1);
