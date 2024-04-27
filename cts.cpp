@@ -3,6 +3,8 @@
 #include <vector>
 #include <iomanip>
 #include <cstring>
+#include <cmath>
+#include <cstdlib>
 using namespace std;
 
 class pin{
@@ -23,7 +25,14 @@ class tap{
             this->y=y;
         }
 };
-void set_capacity_list(vector<vector<vector<int> > > &capacity_list, vector<vector <int> > overlap_list, int capacity_level);
+vector<int> return_vector_int4(int a, int b, int c, int d){
+    vector<int> temp_vector_int;
+    temp_vector_int.push_back(a);
+    temp_vector_int.push_back(b);
+    temp_vector_int.push_back(c);
+    temp_vector_int.push_back(d);
+    return temp_vector_int;
+}
 /* check if the vector contain required element */
 bool vec_contain(vector<int> vec, int target){
     for (int i=0;i<vec.size();i++){
@@ -110,13 +119,13 @@ vector<vector <int> > overlap(vector<vector<int> > line_list, vector<int> line_t
             if (list_index==2){
                 if (test_index==1){
                     if (std::max(test.at(0),list.at(0))!=list.at(1)){
-                        overlap_list.push_back({line_test.at(0),std::max(test.at(0),list.at(0)),line_test.at(2),list.at(1)});
+                        overlap_list.push_back(return_vector_int4(line_test.at(0),std::max(test.at(0),list.at(0)),line_test.at(2),list.at(1)));
                     }
                 }
             } else if (test_index==2){
                 if (list_index==1){
                     if (std::max(test.at(0),list.at(0))!=test.at(1)){
-                        overlap_list.push_back({line_test.at(0),std::max(test.at(0),list.at(0)),line_test.at(2),test.at(1)});
+                        overlap_list.push_back(return_vector_int4(line_test.at(0),std::max(test.at(0),list.at(0)),line_test.at(2),test.at(1)));
                     }
                 }
             }
@@ -161,14 +170,14 @@ vector<vector <int> > overlap(vector<vector<int> > line_list, vector<int> line_t
             if (list_index==2){
                 if (test_index==1){
                     if (std::max(test.at(0),list.at(0))!=list.at(1)){
-                        overlap_list.push_back({std::max(test.at(0),list.at(0)),line_test.at(1),list.at(1),line_test.at(3)});    
+                        overlap_list.push_back(return_vector_int4(std::max(test.at(0),list.at(0)),line_test.at(1),list.at(1),line_test.at(3)));    
                     }
                     
                 }
             } else if (test_index==2){
                 if (list_index==1){
                     if (std::max(test.at(0),list.at(0))!=test.at(1)){
-                        overlap_list.push_back({std::max(test.at(0),list.at(0)),line_test.at(1),test.at(1),line_test.at(3)});
+                        overlap_list.push_back(return_vector_int4(std::max(test.at(0),list.at(0)),line_test.at(1),test.at(1),line_test.at(3)));
                     }
                     
                 }
@@ -458,9 +467,9 @@ int main(int argc, char * argv[]){
                 vector<vector<int> > overlap_list2;
                 bool ignore_capacity=false;
                 if (from_x==to_x){  /* vertical line */
-                    if(!(overlap(line_list,{from_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
-                        set_overlap(line_list,{from_x,from_y,to_x,to_y},capacity_list,0);
-                        line_list.push_back({from_x,from_y,to_x,to_y});
+                    if(!(overlap(line_list,return_vector_int4(from_x,from_y,to_x,to_y)).size()>0)||ignore_capacity){
+                        set_overlap(line_list,return_vector_int4(from_x,from_y,to_x,to_y),capacity_list,0);
+                        line_list.push_back(return_vector_int4(from_x,from_y,to_x,to_y));
                         for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
                             cur_x.push_back(from_x);
                             cur_y.push_back(k);
@@ -472,9 +481,9 @@ int main(int argc, char * argv[]){
                         cout<<"exceed capacity"<<endl;
                     }
                 } else if (from_y==to_y){   /* horizontal line */
-                    if(!(overlap(line_list,{from_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
-                        set_overlap(line_list,{from_x,from_y,to_x,to_y},capacity_list,0);
-                        line_list.push_back({from_x,from_y,to_x,to_y});
+                    if(!(overlap(line_list,return_vector_int4(from_x,from_y,to_x,to_y)).size()>0)||ignore_capacity){
+                        set_overlap(line_list,return_vector_int4(from_x,from_y,to_x,to_y),capacity_list,0);
+                        line_list.push_back(return_vector_int4(from_x,from_y,to_x,to_y));
                         for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
                             cur_x.push_back(k);
                             cur_y.push_back(from_y);
@@ -490,15 +499,15 @@ int main(int argc, char * argv[]){
                     /* first l shape */
                     bool first_lshape=true;
                     previous_line_added=0;
-                    if(!(overlap(line_list,{from_x,from_y,to_x,from_y}).size()>0)&&(overlap(line_list,{to_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
-                        set_overlap(line_list,{from_x,from_y,to_x,from_y},capacity_list,0);
-                        set_overlap(line_list,{to_x,from_y,to_x,to_y},capacity_list,0);
-                        line_list.push_back({from_x,from_y,to_x,from_y});
+                    if(!(overlap(line_list,return_vector_int4(from_x,from_y,to_x,from_y)).size()>0)&&(overlap(line_list,return_vector_int4(to_x,from_y,to_x,to_y)).size()>0)||ignore_capacity){
+                        set_overlap(line_list,return_vector_int4(from_x,from_y,to_x,from_y),capacity_list,0);
+                        set_overlap(line_list,return_vector_int4(to_x,from_y,to_x,to_y),capacity_list,0);
+                        line_list.push_back(return_vector_int4(from_x,from_y,to_x,from_y));
                         for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
                             cur_x.push_back(k);
                             cur_y.push_back(from_y);
                         }
-                        line_list.push_back({to_x,from_y,to_x,to_y});
+                        line_list.push_back(return_vector_int4(to_x,from_y,to_x,to_y));
                         for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
                             cur_x.push_back(to_x);
                             cur_y.push_back(k);
@@ -510,20 +519,20 @@ int main(int argc, char * argv[]){
                     }
                     /* second l shape*/
                     bool need_path_finding=false;
-                    if(!(overlap(line_list,{from_x,from_y,from_x,to_y}).size()>0)&&!(overlap(line_list,{from_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
-                        set_overlap(line_list,{from_x,from_y,from_x,to_y},capacity_list,0);
-                        set_overlap(line_list,{from_x,to_y,to_x,to_y},capacity_list,0);
+                    if(!(overlap(line_list,return_vector_int4(from_x,from_y,from_x,to_y)).size()>0)&&!(overlap(line_list,return_vector_int4(from_x,from_y,to_x,to_y)).size()>0)||ignore_capacity){
+                        set_overlap(line_list,return_vector_int4(from_x,from_y,from_x,to_y),capacity_list,0);
+                        set_overlap(line_list,return_vector_int4(from_x,to_y,to_x,to_y),capacity_list,0);
                     } else{
                         cout<<"exceed capacity"<<endl;
                         need_path_finding=true;
                     }
                     if (!need_path_finding){
-                        line_list.push_back({from_x,from_y,from_x,to_y});
+                        line_list.push_back(return_vector_int4(from_x,from_y,from_x,to_y));
                         for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
                             cur_x.push_back(from_x);
                             cur_y.push_back(k);
                         }
-                        line_list.push_back({from_x,to_y,to_x,to_y});
+                        line_list.push_back(return_vector_int4(from_x,to_y,to_x,to_y));
                         for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
                             cur_x.push_back(k);
                             cur_y.push_back(to_y);
@@ -543,9 +552,9 @@ int main(int argc, char * argv[]){
                 vector<vector<int> > overlap_list2;
                 bool ignore_capacity=false;
                 if (from_x==to_x){  /* vertical line */
-                    if(!(overlap(capacity_list.at(capacity_list.size()-1),{from_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
-                        set_overlap(line_list,{from_x,from_y,to_x,to_y},capacity_list,0);
-                        line_list.push_back({from_x,from_y,to_x,to_y});
+                    if(!(overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(from_x,from_y,to_x,to_y)).size()>0)||ignore_capacity){
+                        set_overlap(line_list,return_vector_int4(from_x,from_y,to_x,to_y),capacity_list,0);
+                        line_list.push_back(return_vector_int4(from_x,from_y,to_x,to_y));
                         for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
                             cur_x.push_back(from_x);
                             cur_y.push_back(k);
@@ -557,9 +566,9 @@ int main(int argc, char * argv[]){
                         cout<<"exceed capacity"<<endl;
                     }
                 } else if (from_y==to_y){   /* horizontal line */
-                    if(!(overlap(capacity_list.at(capacity_list.size()-1),{from_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
-                        set_overlap(line_list,{from_x,from_y,to_x,to_y},capacity_list,0);
-                        line_list.push_back({from_x,from_y,to_x,to_y});
+                    if(!(overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(from_x,from_y,to_x,to_y)).size()>0)||ignore_capacity){
+                        set_overlap(line_list,return_vector_int4(from_x,from_y,to_x,to_y),capacity_list,0);
+                        line_list.push_back(return_vector_int4(from_x,from_y,to_x,to_y));
                         for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
                             cur_x.push_back(k);
                             cur_y.push_back(from_y);
@@ -575,15 +584,15 @@ int main(int argc, char * argv[]){
                     /* first l shape */
                     bool first_lshape=true;
                     previous_line_added=0;
-                    if(!(overlap(capacity_list.at(capacity_list.size()-1),{from_x,from_y,to_x,from_y}).size()>0)&&(overlap(capacity_list.at(capacity_list.size()-1),{to_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
-                        set_overlap(line_list,{from_x,from_y,to_x,from_y},capacity_list,0);
-                        set_overlap(line_list,{to_x,from_y,to_x,to_y},capacity_list,0);
-                        line_list.push_back({from_x,from_y,to_x,from_y});
+                    if(!(overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(from_x,from_y,to_x,from_y)).size()>0)&&(overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(to_x,from_y,to_x,to_y)).size()>0)||ignore_capacity){
+                        set_overlap(line_list,return_vector_int4(from_x,from_y,to_x,from_y),capacity_list,0);
+                        set_overlap(line_list,return_vector_int4(to_x,from_y,to_x,to_y),capacity_list,0);
+                        line_list.push_back(return_vector_int4(from_x,from_y,to_x,from_y));
                         for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
                             cur_x.push_back(k);
                             cur_y.push_back(from_y);
                         }
-                        line_list.push_back({to_x,from_y,to_x,to_y});
+                        line_list.push_back(return_vector_int4(to_x,from_y,to_x,to_y));
                         for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
                             cur_x.push_back(to_x);
                             cur_y.push_back(k);
@@ -595,20 +604,20 @@ int main(int argc, char * argv[]){
                     }
                     /* second l shape*/
                     bool need_path_finding=false;
-                    if(!(overlap(capacity_list.at(capacity_list.size()-1),{from_x,from_y,from_x,to_y}).size()>0)&&!(overlap(capacity_list.at(capacity_list.size()-1),{from_x,from_y,to_x,to_y}).size()>0)||ignore_capacity){
-                        set_overlap(line_list,{from_x,from_y,from_x,to_y},capacity_list,0);
-                        set_overlap(line_list,{from_x,to_y,to_x,to_y},capacity_list,0);
+                    if(!(overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(from_x,from_y,from_x,to_y)).size()>0)&&!(overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(from_x,from_y,to_x,to_y)).size()>0)||ignore_capacity){
+                        set_overlap(line_list,return_vector_int4(from_x,from_y,from_x,to_y),capacity_list,0);
+                        set_overlap(line_list,return_vector_int4(from_x,to_y,to_x,to_y),capacity_list,0);
                     } else{
                         cout<<"exceed capacity"<<endl;
                         need_path_finding=true;
                     }
                     if (!need_path_finding){
-                        line_list.push_back({from_x,from_y,from_x,to_y});
+                        line_list.push_back(return_vector_int4(from_x,from_y,from_x,to_y));
                         for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
                             cur_x.push_back(from_x);
                             cur_y.push_back(k);
                         }
-                        line_list.push_back({from_x,to_y,to_x,to_y});
+                        line_list.push_back(return_vector_int4(from_x,to_y,to_x,to_y));
                         for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
                             cur_x.push_back(k);
                             cur_y.push_back(to_y);
