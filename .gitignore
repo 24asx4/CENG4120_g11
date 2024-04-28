@@ -1,4 +1,5 @@
 *.exe
 *.out
+*.pdf
 /output
 /cse_server_testing
