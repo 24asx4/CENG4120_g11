@@ -1,2 +1,4 @@
 *.exe
 *.out
+/output
+/cse_server_testing
