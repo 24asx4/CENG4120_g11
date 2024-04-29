@@ -5,4 +5,6 @@ call cts --input test2.in --output test2.out
 call cts --input test3.in --output test3.out
 call cts --input test4.in --output test4.out
 call cts --input test5.in --output test5.out
+call cts --input test6.in --output test6.out
+call cts --input test7.in --output test7.out
 pause 
