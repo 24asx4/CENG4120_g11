@@ -601,12 +601,12 @@ int main(int argc, char * argv[]){
                     bool path_exist=false;
                     vector<int>not_routable_x;
                     vector<int>not_routable_y;
-                    int fail=0;
+                    // int fail=0;
                     while (not_routable_x.size()<cur_x.size()){
                         path_exist=path_finding(from_x,from_y,to_x,to_y,previous_line_added,previous_point_added,cur_x,cur_y,capacity_list,grid_size);
                         if (!path_exist){
-                            fail++;
-                            cout<<fail<<endl;
+                            // fail++;
+                            // cout<<fail<<endl;
                             not_routable_x.push_back(from_x);
                             not_routable_y.push_back(from_y);
                             int re_min=99999999;
@@ -665,12 +665,12 @@ int main(int argc, char * argv[]){
                     bool path_exist=false;
                     vector<int>not_routable_x;
                     vector<int>not_routable_y;
-                    int fail=0;
+                    // int fail=0;
                     while (not_routable_x.size()<cur_x.size()){
                         path_exist=path_finding(from_x,from_y,to_x,to_y,previous_line_added,previous_point_added,cur_x,cur_y,capacity_list,grid_size);
                         if (!path_exist){
-                            fail++;
-                            cout<<fail<<endl;
+                            // fail++;
+                            // cout<<fail<<endl;
                             not_routable_x.push_back(from_x);
                             not_routable_y.push_back(from_y);
                             int re_min=99999999;
