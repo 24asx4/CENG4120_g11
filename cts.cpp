@@ -33,6 +33,12 @@ vector<int> return_vector_int4(int a, int b, int c, int d){
     temp_vector_int.push_back(d);
     return temp_vector_int;
 }
+vector<int> return_vector_int2(int a, int b){
+    vector<int> temp_vector_int;
+    temp_vector_int.push_back(a);
+    temp_vector_int.push_back(b);
+    return temp_vector_int;
+}
 /* check if the vector contain required element */
 bool vec_contain(vector<int> vec, int target){
     for (int i=0;i<vec.size();i++){
@@ -242,22 +248,13 @@ void step(vector<vector<int> > &grid, int start_x, int start_y, int end_x, int e
         }
     }
 }
-bool path_finding(int start_x, int start_y, int end_x, int end_y, int &previous_line_added, int &previous_point_added, vector<int> &cur_x, vector<int> &cur_y, vector<vector<vector<int> > > &capacity_list, int grid_size){
+bool path_finding(int start_x, int start_y, int end_x, int end_y, int &previous_line_added, int &previous_point_added, vector<int> &cur_x, vector<int> &cur_y, vector<vector<vector<int> > > &capacity_list, int grid_size){    
     /* setup the array */
     vector<int> grid_sub(grid_size,0);
     vector<vector<int> > grid(grid_size,grid_sub);
     /* set starting point to special number avoid being traversed */
     int starting_point_code=-2;
     grid.at(start_y).at(start_x)=starting_point_code;
-    /*
-    for (int i=grid.size()-1;i>=0;i--){
-        for (int j=0;j<grid.at(i).size();j++){
-            cout<<setw(3)<<grid.at(i).at(j);
-        }
-        cout<<endl;
-    }
-    cout<<endl<<endl;
-    */
     vector<int> point;
     vector<vector<int> > being_expend;
     vector<vector<int> > next_expend;
@@ -267,25 +264,20 @@ bool path_finding(int start_x, int start_y, int end_x, int end_y, int &previous_
     being_expend.push_back(point);
     point.clear();
     int no_step=1;
+    
     while (!found&&being_expend.size()>0){
         step(grid,being_expend.at(0).at(0),being_expend.at(0).at(1),end_x,end_y,no_step,grid_size,capacity_list,next_expend,found);
         being_expend.erase(being_expend.begin());
         if (being_expend.size()==0){
-            /*
-            for (int i=grid.size()-1;i>=0;i--){
-                for (int j=0;j<grid.at(i).size();j++){
-                    cout<<setw(3)<<grid.at(i).at(j);
-                }
-                cout<<endl;
-            }
-            cout<<endl<<endl;
-            */
             being_expend=next_expend;
             no_step++;
         }
     }
+    
     vector<vector<int> >found_edge;
     if (found){
+        cur_x.clear();
+        cur_y.clear();
         previous_point_added=0;
         int cx=end_x;
         int cy=end_y;
@@ -314,14 +306,7 @@ bool path_finding(int start_x, int start_y, int end_x, int end_y, int &previous_
         }
         previous_line_added=1;
     }
-    /*
-    for (int i=0;i<found_edge.size();i++){
-        for (int j=0;j<found_edge.at(i).size();j++){
-            cout<<found_edge.at(i).at(j)<<" ";
-        }
-        cout<<endl;
-    }
-    */
+    
     return found;
 }
 int main(int argc, char * argv[]){
@@ -379,6 +364,8 @@ int main(int argc, char * argv[]){
             in>>temp_x;
             in>>temp_y;
             taps.push_back(new tap(temp_num, temp_x, temp_y));
+        } else if (info_type=="END"){
+            in>>info_type;
         }
     }
     in.close();
@@ -394,47 +381,45 @@ int main(int argc, char * argv[]){
         pin_d.push_back(temp_vec);
         temp_vec.clear();
     }
-    /* print the table (debug only) */
-    /*
-    for (int i=0;i<curr_load_remain.size();i++){
-        cout<<"load_tap"<<i<<": "<<curr_load_remain.at(i)<<endl;
-    }
-    for (int i=0;i<pin_d.size();i++){
-        cout<<"pin"<<i<<" :";
-        for (int j=0;j<pin_d.at(0).size();j++){
-            cout<<pin_d.at(i).at(j)<<" ";
-        }
-        cout<<endl;
-    }
-    */
     /* run the alg */
     vector<int> max_dis_pin;
     vector<int> min_dis_pin;
     vector<int> done;
     vector<vector <int> > pin_to_tap(num_taps);
     vector<int> full_load;
-    
-    while (done.size()<num_pins){
+    vector <vector <int> > max_num_each_pin;
+    for (int i=0;i<pin_d.size();i++){
+        vector <int> temp_2;
         int max_dis=-1;
-        for (int i=0;i<pin_d.size();i++){
-            if (vec_contain(done,i)){
-                continue;
-            }
-            for (int j=0;j<pin_d.at(0).size();j++){
-                if (pin_d.at(i).at(j)>max_dis){
-                    max_dis_pin.clear();
-                    max_dis=pin_d.at(i).at(j);
-                    if (!vec_contain(max_dis_pin, i)){
-                        max_dis_pin.push_back(i);
-                    }
-                } else if (pin_d.at(i).at(j)==max_dis){
-                    if (!vec_contain(max_dis_pin, i)){
-                        max_dis_pin.push_back(i);
-                    }
-                }
+        for (int j=0;j<pin_d.at(i).size();j++){
+            if (pin_d.at(i).at(j)>max_dis){
+                max_dis=pin_d.at(i).at(j);
             }
         }
+        temp_2.push_back(max_dis);
+        temp_2.push_back(i);
+        max_num_each_pin.push_back(temp_2);
+        temp_2.clear();
+    }
+    while (max_num_each_pin.size()>0){
+        int max_dis=-1;
+        for (int i=0;i<max_num_each_pin.size();i++){
+            if (max_num_each_pin.at(i).at(0)>max_dis){
+                max_dis_pin.clear();
+                done.clear();
+                max_dis=max_num_each_pin.at(i).at(0);
+                if (!vec_contain(max_dis_pin, max_num_each_pin.at(i).at(1))){
+                    max_dis_pin.push_back(max_num_each_pin.at(i).at(1));
+                    done.push_back(i);
+                }
+            } else if (max_num_each_pin.at(i).at(0)==max_dis){
+                if (!vec_contain(max_dis_pin, max_num_each_pin.at(i).at(1))){
+                    max_dis_pin.push_back(max_num_each_pin.at(i).at(1));
+                    done.push_back(i);
+                }
+            }
 
+        }
         for (int i=0;i<max_dis_pin.size();i++){
             int min_dis=9999999;
             for (int j=0;j<pin_d.at(0).size();j++){
@@ -461,74 +446,25 @@ int main(int argc, char * argv[]){
             }
             min_dis_pin.clear();
         }
-        for (int i=0;i<max_dis_pin.size();i++){
-            done.push_back(max_dis_pin.at(i));
+
+        for (int i=0;i<done.size();i++){
+            max_num_each_pin.erase(max_num_each_pin.begin()+done.at(i)-i);
         }
-        /* print the pins assigning step (debug only) */
-        /*
-        cout<<endl;
-        cout<<"max_dis_pin: ";
-        for (int i=0;i<max_dis_pin.size();i++){
-            cout<<max_dis_pin.at(i)<<" ";
-        }
-        cout<<endl;
-        for (int i=0;i<pin_to_tap.size();i++){
-            cout<<"pin_to_tap"<<i<<": ";
-            for (int j=0;j<pin_to_tap.at(i).size();j++){
-                cout<<pin_to_tap.at(i).at(j)<<" ";    
-            }
-            cout<<endl;
-        }
-        for (int i=0;i<curr_load_remain.size();i++){
-            cout<<"load_tap"<<i<<": "<<curr_load_remain.at(i)<<endl;
-        }
-        */
         max_dis_pin.clear();
     }
-    /* print the info just from the input file (debug only) */
-    /*
-    cout<<endl;
-    cout<<"debug_info----------------------------------------------------"<<endl;
-    cout<<"max_runtime: "<<max_runtime<<endl;
-    cout<<"max_load: "<<max_load<<endl;
-    cout<<"grid_size: "<<grid_size<<endl;
-    cout<<"capacity: "<<capacity<<endl;
-    cout<<"pins: "<<num_pins<<endl;
-    for (int i=0;i<num_pins;i++){
-        cout<<"pin"<<i<<": "<<pins.at(i)->x<<" "<<pins.at(i)->y<<endl;
-    }
-    cout<<"taps: "<<num_taps<<endl;
-    for (int i=0;i<num_taps;i++){
-        cout<<"tap"<<i<<": "<<taps.at(i)->x<<" "<<taps.at(i)->y<<endl;
-    }
-    */
     vector<vector<int> > pin_to_tap_route=pin_to_tap;
     vector<vector<vector<int> > > capacity_list(capacity);
     vector<int> line_cutoff(1,0);
-    //i=tap
-    //j=pin_to
-    //k=point_from
     for (int i=0;i<taps.size();i++){
         int previous_line_added=0;
         int previous_point_added=0;
-        //cout<<"tap"<<i<<endl;
         vector<int> cur_x;
         vector<int> cur_y;
         cur_x.push_back(taps.at(i)->x);
         cur_y.push_back(taps.at(i)->y);
+        // vector<vector<int> > pin_shortest_point(taps.size());
         while (pin_to_tap_route.at(i).size()>0){
-            /*
-            cout<<"cur_x: ";
-            for (int j=0;j<cur_x.size();j++){
-                cout<<cur_x.at(j)<<" ";
-            }
-            cout<<endl;
-            cout<<"cur_y: ";
-            for (int j=0;j<cur_y.size();j++){
-                cout<<cur_y.at(j)<<" ";
-            }
-            cout<<endl;
-            */
+            
             int min=99999999;
             int from_x=-1;
             int from_y=-1;
@@ -537,7 +473,6 @@ int main(int argc, char * argv[]){
             int to_index=0;
             for (int j=0;j<pin_to_tap_route.at(i).size();j++){
                 for (int k=0;k<cur_x.size();k++){
-                    //cout<<manhattan_distance(cur_x.at(k),cur_y.at(k),pins.at(pin_to_tap_route.at(i).at(j))->x,pins.at(pin_to_tap_route.at(i).at(j))->y)<<" ";
                     if(manhattan_distance(cur_x.at(k),cur_y.at(k),pins.at(pin_to_tap_route.at(i).at(j))->x,pins.at(pin_to_tap_route.at(i).at(j))->y)<min){
                         min=manhattan_distance(cur_x.at(k),cur_y.at(k),pins.at(pin_to_tap_route.at(i).at(j))->x,pins.at(pin_to_tap_route.at(i).at(j))->y);
                         from_x=cur_x.at(k);
@@ -548,15 +483,9 @@ int main(int argc, char * argv[]){
                     }
                 }
             }
-            //cout<<endl;
+            // pin_shortest_point.at(i).push_back(from_x);
+            // pin_shortest_point.at(i).push_back(from_y);
             pin_to_tap_route.at(i).erase(pin_to_tap_route.at(i).begin()+to_index);
-            /* print the from and to*/
-            /*
-            cout<<"from_x: "<<from_x<<endl;
-            cout<<"from_y: "<<from_y<<endl;
-            cout<<"to_x: "<<to_x<<endl;
-            cout<<"to_y: "<<to_y<<endl;
-            */
             /* remove the line and point */
             if (capacity_list.at(0).size()>0&&previous_line_added>1){
                 if (lie_on_line(from_x,from_y,capacity_list.at(0).at(capacity_list.at(0).size()-1).at(0),capacity_list.at(0).at(capacity_list.at(0).size()-1).at(1),capacity_list.at(0).at(capacity_list.at(0).size()-1).at(2),capacity_list.at(0).at(capacity_list.at(0).size()-1).at(3)) || lie_on_line(from_x,from_y,capacity_list.at(0).at(capacity_list.at(0).size()-2).at(0),capacity_list.at(0).at(capacity_list.at(0).size()-2).at(1),capacity_list.at(0).at(capacity_list.at(0).size()-2).at(2),capacity_list.at(0).at(capacity_list.at(0).size()-2).at(3))){
@@ -588,6 +517,8 @@ int main(int argc, char * argv[]){
             bool ignore_capacity=false;
             if (from_x==to_x){  /* vertical line */
                 if((overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(from_x,from_y,to_x,to_y)).size()==0)||ignore_capacity){
+                    cur_x.clear();
+                    cur_y.clear();
                     set_overlap(capacity_list.at(0),return_vector_int4(from_x,from_y,to_x,to_y),capacity_list,1);
                     capacity_list.at(0).push_back(return_vector_int4(from_x,from_y,to_x,to_y));
                     for (int k=std::min(from_y,to_y);k<=std::max(from_y,to_y);k++){
@@ -601,12 +532,9 @@ int main(int argc, char * argv[]){
                     bool path_exist=false;
                     vector<int>not_routable_x;
                     vector<int>not_routable_y;
-                    // int fail=0;
                     while (not_routable_x.size()<cur_x.size()){
                         path_exist=path_finding(from_x,from_y,to_x,to_y,previous_line_added,previous_point_added,cur_x,cur_y,capacity_list,grid_size);
                         if (!path_exist){
-                            // fail++;
-                            // cout<<fail<<endl;
                             not_routable_x.push_back(from_x);
                             not_routable_y.push_back(from_y);
                             int re_min=99999999;
@@ -629,7 +557,9 @@ int main(int argc, char * argv[]){
                                     re_from_y=cur_y.at(k);
                                 }
                             }
-
+                            if (re_from_x==-1||re_from_y==-1){
+                                break;
+                            }
                             from_x=re_from_x;
                             from_y=re_from_y;
                         } else{
@@ -652,6 +582,8 @@ int main(int argc, char * argv[]){
                 }
             } else if (from_y==to_y){   /* horizontal line */
                 if((overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(from_x,from_y,to_x,to_y)).size()==0)||ignore_capacity){
+                    cur_x.clear();
+                    cur_y.clear();
                     set_overlap(capacity_list.at(0),return_vector_int4(from_x,from_y,to_x,to_y),capacity_list,1);
                     capacity_list.at(0).push_back(return_vector_int4(from_x,from_y,to_x,to_y));
                     for (int k=std::min(from_x,to_x);k<=std::max(from_x,to_x);k++){
@@ -665,12 +597,9 @@ int main(int argc, char * argv[]){
                     bool path_exist=false;
                     vector<int>not_routable_x;
                     vector<int>not_routable_y;
-                    // int fail=0;
                     while (not_routable_x.size()<cur_x.size()){
                         path_exist=path_finding(from_x,from_y,to_x,to_y,previous_line_added,previous_point_added,cur_x,cur_y,capacity_list,grid_size);
                         if (!path_exist){
-                            // fail++;
-                            // cout<<fail<<endl;
                             not_routable_x.push_back(from_x);
                             not_routable_y.push_back(from_y);
                             int re_min=99999999;
@@ -693,7 +622,9 @@ int main(int argc, char * argv[]){
                                     re_from_y=cur_y.at(k);
                                 }
                             }
-
+                            if (re_from_x==-1||re_from_y==-1){
+                                break;
+                            }
                             from_x=re_from_x;
                             from_y=re_from_y;
                         } else{
@@ -714,12 +645,13 @@ int main(int argc, char * argv[]){
                         previous_point_added=abs(from_y-to_y)+1;
                     }
                 }
-
             } else{
                 /* first l shape */
                 bool first_lshape=true;
                 previous_line_added=0;
-                if((overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(from_x,from_y,to_x,from_y)).size()==0)&&(overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(to_x,from_y,to_x,to_y)).size()==0)||ignore_capacity){
+                if(((overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(from_x,from_y,to_x,from_y)).size()==0)&&(overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(to_x,from_y,to_x,to_y)).size()==0))||ignore_capacity){
+                    cur_x.clear();
+                    cur_y.clear();
                     set_overlap(capacity_list.at(0),return_vector_int4(from_x,from_y,to_x,from_y),capacity_list,1);
                     set_overlap(capacity_list.at(0),return_vector_int4(to_x,from_y,to_x,to_y),capacity_list,1);
                     capacity_list.at(0).push_back(return_vector_int4(from_x,from_y,to_x,from_y));
@@ -739,7 +671,11 @@ int main(int argc, char * argv[]){
                 }
                 /* second l shape*/
                 bool need_path_finding=false;
-                if((overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(from_x,from_y,from_x,to_y)).size()==0)&&(overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(from_x,from_y,to_x,to_y)).size()==0)||ignore_capacity){
+                if(((overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(from_x,from_y,from_x,to_y)).size()==0)&&(overlap(capacity_list.at(capacity_list.size()-1),return_vector_int4(from_x,from_y,to_x,to_y)).size()==0))||ignore_capacity){
+                    if (!first_lshape){
+                        cur_x.clear();
+                        cur_y.clear();    
+                    }
                     set_overlap(capacity_list.at(0),return_vector_int4(from_x,from_y,from_x,to_y),capacity_list,1);
                     set_overlap(capacity_list.at(0),return_vector_int4(from_x,to_y,to_x,to_y),capacity_list,1);
                     capacity_list.at(0).push_back(return_vector_int4(from_x,from_y,from_x,to_y));
@@ -761,18 +697,16 @@ int main(int argc, char * argv[]){
                     bool path_exist=false;
                     vector<int>not_routable_x;
                     vector<int>not_routable_y;
-                    // int fail=0;
                     while (not_routable_x.size()<cur_x.size()){
                         path_exist=path_finding(from_x,from_y,to_x,to_y,previous_line_added,previous_point_added,cur_x,cur_y,capacity_list,grid_size);
                         if (!path_exist){
-                            // fail++;
-                            // cout<<fail<<endl;
                             not_routable_x.push_back(from_x);
                             not_routable_y.push_back(from_y);
                             int re_min=99999999;
                             int re_from_x=-1;
                             int re_from_y=-1;
                             bool fail_point=false;
+                            
                             for (int k=0;k<cur_x.size();k++){
                                 for (int l=0;l<not_routable_x.size();l++){
                                     if (cur_x.at(k)==not_routable_x.at(l)&&cur_y.at(k)==not_routable_y.at(l)){
@@ -789,12 +723,15 @@ int main(int argc, char * argv[]){
                                     re_from_y=cur_y.at(k);
                                 }
                             }
-
+                            if (re_from_x==-1||re_from_y==-1){
+                                break;
+                            }
                             from_x=re_from_x;
                             from_y=re_from_y;
                         } else{
                             break;
                         }
+                        
                     }/* path finding not work */
                     if (!path_exist){
                         cout<<"exceed capacity L shape"<<endl;
@@ -818,58 +755,15 @@ int main(int argc, char * argv[]){
                 if (!need_path_finding||first_lshape){
                     previous_point_added=previous_line_added*(abs(from_y-to_y)+1+abs(from_x-to_x)+1);
                 }
-                
             }
-            
-
             /* remove line 1 more time for last routing step */
             if (capacity_list.at(0).size()>0&&previous_line_added>1&&pin_to_tap_route.at(i).size()==0){
                 capacity_list.at(0).erase(capacity_list.at(0).end()-1);
                 capacity_list.at(0).erase(capacity_list.at(0).end()-1);
-            }
-            /* print the line added*/
-            /*
-            cout<<"line: "<<endl;
-            for (int j=0;j<capacity_list.at(0).size();j++){
-                for (int k=0;k<capacity_list.at(0).at(j).size();k++){
-                    cout<<capacity_list.at(0).at(j).at(k)<<" ";
-                }
-                cout<<endl;
-            }
-            */
-            
-            
+            }           
         }
         line_cutoff.push_back(capacity_list.at(0).size());
-        //cout<<endl;
     }
-    /*
-    vector<vector<int> > overlap_list=overlap(capacity_list.at(0),{2,6,4,6});
-    cout<<"overlap2: "<<(overlap(capacity_list.at(0),{4,8,6,8}).size()==0&&overlap(capacity_list.at(0),{6,8,6,6}).size()==0)<<endl;
-    cout<<"overlap: "<<endl;
-    for (int i=0;i<overlap_list.size();i++){
-        for (int j=0;j<overlap_list.at(i).size();j++){
-            cout<<overlap_list.at(i).at(j)<<" ";
-        }
-        cout<<endl;
-    }
-    */
-    /* print the capacity list */
-    /*
-    for (int i=0;i<capacity_list.size();i++){
-        cout<<"capacity_level "<<i<<": "<<endl;
-        for (int j=0;j<capacity_list.at(i).size();j++){
-            for (int k=0;k<capacity_list.at(i).at(j).size();k++){
-                cout<<capacity_list.at(i).at(j).at(k)<<" ";
-            }
-            cout<<endl;
-        }
-    }
-    */
-    // vector<int> cur_x;
-    // vector<int> cur_y;
-    // int previous_point_added=0, previous_line_added=0;
-    // path_finding(7,6,6,9,previous_line_added,previous_point_added,cur_x,cur_y,capacity_list,grid_size);
     /* output file */
     for (int i=0;i<pin_to_tap.size();i++){
         out<<"TAP "<<i<<endl;
@@ -884,9 +778,8 @@ int main(int argc, char * argv[]){
     }
     
     out.close();
-    
 
     /* measuer time (end) */
     int end = clock();
-	std::cout << "it took " << end - start << " ticks, or " << ((float)end - start)/CLOCKS_PER_SEC << "seconds." << std::endl;
+	std::cout << "whole it took " << end - start << " ticks, or " << ((float)end - start)/CLOCKS_PER_SEC << "seconds." << std::endl;
 }
