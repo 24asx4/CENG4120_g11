@@ -540,7 +540,7 @@ int main(int argc, char * argv[]){
                     min_by_pin_index=j;
                 }
             }
-            if (min>=min_by_pin){
+            if (min>min_by_pin){
                 from_x=pin_shortest_point.at(min_by_pin_index).at(0);
                 from_y=pin_shortest_point.at(min_by_pin_index).at(1);
                 to_x=pin_shortest_point.at(min_by_pin_index).at(2);
