@@ -287,11 +287,15 @@ bool path_finding(int start_x, int start_y, int end_x, int end_y, int &previous_
     int no_step=1;
     
     while (!found&&being_expend.size()>0){
-        step(grid,being_expend.at(0).at(0),being_expend.at(0).at(1),end_x,end_y,no_step,grid_size,capacity_list,next_expend,found);
-        being_expend.erase(being_expend.begin());
-        if (being_expend.size()==0){
+        for (int i=0;i<being_expend.size();i++){
+            step(grid,being_expend.at(i).at(0),being_expend.at(i).at(1),end_x,end_y,no_step,grid_size,capacity_list,next_expend,found);
+        }
+        if (next_expend.size()!=0){
             being_expend=next_expend;
+            next_expend.clear();
             no_step++;
+        } else{
+            break;
         }
     }
     
