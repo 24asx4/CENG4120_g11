@@ -192,6 +192,7 @@ vector<vector <int> > overlap(vector<vector<int> > line_list, vector<int> line_t
     }
     return overlap_list;
 }
+/* set overlap list */
 void set_overlap(vector<vector<int> > line_list, vector<int> line_test, vector<vector<vector<int> > > &capacity_list, int capacity_level){
     if (capacity_list.size()<=capacity_level){
         return;
@@ -204,7 +205,7 @@ void set_overlap(vector<vector<int> > line_list, vector<int> line_test, vector<v
     }
     
 }
-
+/* set the min distance between point and pin, then clear the point list */
 void reset_point(vector <int> &cur_x, vector <int> &cur_y, vector <vector<int> > pin_to_tap_route, vector <vector<int> > &pin_shortest_point, int i, vector<pin *>  pins){
     
     for (int j=0;j<pin_to_tap_route.at(i).size();j++){
@@ -239,9 +240,7 @@ void reset_point(vector <int> &cur_x, vector <int> &cur_y, vector <vector<int> >
     
 }
 
-
-
-
+/* in path finding, expand the neighborhood if there is a edge that doesn't exceed capacity */
 void step(vector<vector<int> > &grid, int start_x, int start_y, int end_x, int end_y, int grid_size, vector<vector<vector<int> > > capacity_list, vector<vector<int> > &next_expend, bool &found, bool add_detour){
     if (start_x==end_x&&start_y==end_y){
         found=true;
@@ -286,6 +285,7 @@ void step(vector<vector<int> > &grid, int start_x, int start_y, int end_x, int e
         }
     }
 }
+/* path finding, hadlock's alg. */
 bool path_finding(int start_x, int start_y, int end_x, int end_y, int &previous_line_added, int &previous_point_added, vector<int> &cur_x, vector<int> &cur_y, vector<vector<vector<int> > > &capacity_list, int grid_size, vector <vector<int> > pin_to_tap_route, vector <vector<int> > &pin_shortest_point, int i, vector<pin *>  pins){    
     /* setup the array */
     vector<int> grid_sub(grid_size,-10);
@@ -301,6 +301,7 @@ bool path_finding(int start_x, int start_y, int end_x, int end_y, int &previous_
     corner.push_back(return_vector_int2(start_x,start_y));
     int no_step=1;
     bool cur_detour_done=false;
+    /* expand */
     while (!found&&being_expend.size()>0){
         for (int i=0;i<being_expend.size();i++){
             step(grid,being_expend.at(i).at(0),being_expend.at(i).at(1),end_x,end_y,grid_size,capacity_list,next_expend,found,false);
@@ -337,6 +338,7 @@ bool path_finding(int start_x, int start_y, int end_x, int end_y, int &previous_
 			cur_detour_done=true;
         }
     }
+    /* backtrace */
     vector<vector<int> >found_edge;
     if (found){
         reset_point(cur_x, cur_y, pin_to_tap_route, pin_shortest_point, i, pins);
@@ -405,6 +407,7 @@ bool path_finding(int start_x, int start_y, int end_x, int end_y, int &previous_
     }
     return found;
 }
+/* find a new point to route to the pin */
 void new_point_for_path_finding(bool &path_exist, int from_x, int from_y, int to_x, int to_y, int &previous_line_added, int &previous_point_added, vector<int> &cur_x, vector<int> &cur_y, vector<vector<vector<int> > > &capacity_list, int grid_size, vector <vector<int> > pin_to_tap_route, vector <vector<int> > &pin_shortest_point, int i, vector<pin *>  pins){
     vector<int>not_routable_x;
     vector<int>not_routable_y;
