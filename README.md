@@ -1,4 +1,4 @@
-# CSCI4120_g11
+# CENG4120_g11
 
 compile the script
 ```g++ -o cts.exe cts.cpp```
